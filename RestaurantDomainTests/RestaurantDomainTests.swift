@@ -10,29 +10,35 @@ import XCTest
 
 final class RestaurantDomainTests: XCTestCase {
     
-    func testInitRestaurantloader() throws {
-        let anyURL = try XCTUnwrap(URL(string: "https://comitando.com.br"))
+    private func makeSut() -> (sut: RemoteRestaurantLoader, clientSpy: NetworkClientSpy, anyUrl: URL){
+        let anyURL = URL(string: "https://comitando.com.br")!
         let clientSpy = NetworkClientSpy()
         let sut = RemoteRestaurantLoader(url: anyURL, networkClient: clientSpy)
+        
+        return (sut, clientSpy, anyURL)
+    }
+    
+    func testInitRestaurantloader() throws {
+        
+        let (sut, clientSpy, anyUrl) = makeSut()
+        
         sut.load() { _ in }
         
-        XCTAssertEqual(clientSpy.urlRequests, [anyURL])
+        XCTAssertEqual(clientSpy.urlRequests, [anyUrl])
     }
     
     func testloadTwice() throws {
-        let anyURL = try XCTUnwrap(URL(string: "https://comitando.com.br"))
-        let clientSpy = NetworkClientSpy()
-        let sut = RemoteRestaurantLoader(url: anyURL, networkClient: clientSpy)
+        
+        let (sut, clientSpy, anyUrl) = makeSut()
+        
         sut.load() { _ in }
         sut.load() { _ in }
         
-        XCTAssertEqual(clientSpy.urlRequests, [anyURL, anyURL])
+        XCTAssertEqual(clientSpy.urlRequests, [anyUrl, anyUrl])
     }
     
     func testNotConnectivity() throws {
-        let anyURL = try XCTUnwrap(URL(string: "https://comitando.com.br"))
-        let clientSpy = NetworkClientSpy()
-        let sut = RemoteRestaurantLoader(url: anyURL, networkClient: clientSpy)
+        let (sut, clientSpy, _) = makeSut()
         
         let exp = expectation(description: "Esperando retorno da clousure")
         var returnedResult: RemoteRestaurantLoader.Error?
@@ -46,9 +52,7 @@ final class RestaurantDomainTests: XCTestCase {
     }
     
     func testInvaliData() throws {
-        let anyURL = try XCTUnwrap(URL(string: "https://comitando.com.br"))
-        let clientSpy = NetworkClientSpy()
-        let sut = RemoteRestaurantLoader(url: anyURL, networkClient: clientSpy)
+        let (sut, clientSpy, _) = makeSut()
         
         let exp = expectation(description: "Esperando retorno da clousure")
         var returnedResult: RemoteRestaurantLoader.Error?
